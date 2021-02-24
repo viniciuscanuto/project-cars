@@ -1,9 +1,14 @@
 import { Router, Request, Response} from 'express'
+import { MongoConnect } from './db/MongoConnect'
+import { MongoClient} from 'mongodb'
+import { Car } from './models/Car';
+import { CarValidator } from './validator/CarValidator';
+
+import CarController from './controller/CarController'
+
 
 const routes = Router();
 
-routes.get('/cars', (req: Request, res: Response) => {
-  return res.json({ mensagem: 'teste'})
-})
+routes.post('/cars', CarController.create)
 
 export default routes;
