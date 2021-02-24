@@ -11,6 +11,6 @@ const routes = Router();
 
 routes.post('/cars', CarController.create)
 routes.get('/cars', CarController.index)
-
+routes.get('/cars/:id', CarController.show)
 
 export default routes;

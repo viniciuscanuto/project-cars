@@ -61,4 +61,14 @@ export default {
     return response.json(result)
   },
 
+  async show(request: Request, response: Response) {
+    await client.connect();
+    const database = client.db("project-cars");
+    const collection = database.collection("car");
+
+    const { id } = request.params
+
+    const result = await collection.findOne({ "_id" : new ObjectId(id)})
+    return response.json(result)
+  }
 }
