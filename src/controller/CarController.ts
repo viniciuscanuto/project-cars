@@ -1,5 +1,5 @@
 import {Request, Response} from 'express'
-import { MongoClient} from 'mongodb'
+import { MongoClient, ObjectId} from 'mongodb'
 import { Car } from '../models/Car';
 import { CarValidator } from '../validator/CarValidator';
 
@@ -34,7 +34,7 @@ export default {
   
     const carValidator = new CarValidator()
     const isValid = await carValidator.validate(dataCar)
-    
+
     if(isValid){
       await client.connect();
       const database = client.db("project-cars");
@@ -50,4 +50,15 @@ export default {
       return response.json({message: 'fail'})
     }
   },
+
+  async index(request: Request, response: Response) {
+    await client.connect();
+    const database = client.db("project-cars");
+    const collection = database.collection("car");
+
+    const result = await collection.aggregate().toArray()
+
+    return response.json(result)
+  },
+
 }
