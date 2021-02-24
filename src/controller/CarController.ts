@@ -1,14 +1,25 @@
 import {Request, Response} from 'express'
-import { MongoClient, ObjectId} from 'mongodb'
+import { Collection, MongoClient, ObjectId} from 'mongodb'
+import { MongoRepository } from '../db/MongoRepository';
 import { Car } from '../models/Car';
 import { CarValidator } from '../validator/CarValidator';
 
 const uri = 'mongodb://localhost:27017/project-cars'
+const dbname = 'project-cars'
+const collection = 'car'
 
-const client = new MongoClient(uri , {
+/* const client = new MongoClient(uri , {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
+
+async function getCollection(name: string): Promise<Collection>{
+  await client.connect()
+  return client.db(dbname).collection(name)
+}
+ */
+const mongoRepository = new MongoRepository(uri)
+
 
 export default {
   async create (request: Request, response: Response){
@@ -36,11 +47,8 @@ export default {
     const isValid = await carValidator.validate(dataCar)
 
     if(isValid){
-      await client.connect();
-      const database = client.db("project-cars");
-      const collection = database.collection("car");
-      
-      const result = await collection.insertOne(dataCar);
+      const carCollection = await mongoRepository.getCollection('car')
+      const result = await carCollection.insertOne(dataCar);
       
       return response.json({message: 'ok'})
     }else{
@@ -49,30 +57,21 @@ export default {
   },
 
   async index(request: Request, response: Response) {
-    await client.connect();
-    const database = client.db("project-cars");
-    const collection = database.collection("car");
-
-    const result = await collection.aggregate().toArray()
+    const carCollection = await mongoRepository.getCollection('car')
+    const result = await carCollection.aggregate().toArray()
 
     return response.json(result)
   },
 
   async show(request: Request, response: Response) {
-    await client.connect();
-    const database = client.db("project-cars");
-    const collection = database.collection("car");
-
     const { id } = request.params
 
-    const result = await collection.findOne({ "_id" : new ObjectId(id)})
+    const carCollection = await mongoRepository.getCollection('car')
+    const result = await carCollection.findOne({ "_id" : new ObjectId(id)})
     return response.json(result)
   },
 
   async edit(request: Request, response: Response) {
-    await client.connect();
-    const database = client.db("project-cars");
-    const collection = database.collection("car");
 
     const { id } = request.params
     const {
@@ -85,7 +84,8 @@ export default {
       preco_de_venda
     }: Car = request.body
 
-    const result = await collection.updateOne({
+    const carCollection = await mongoRepository.getCollection('car')
+    const result = await carCollection.updateOne({
       "_id" : new ObjectId(id)
       }, {
         $set: {
@@ -104,13 +104,10 @@ export default {
   },
 
   async destroy(request: Request, response: Response) {
-    await client.connect();
-    const database = client.db("project-cars");
-    const collection = database.collection("car");
-    
     const { id } = request.params
 
-    const result = await collection.deleteOne({ '_id': new ObjectId(id)}) 
+    const carCollection = await mongoRepository.getCollection('car')
+    const result = await carCollection.deleteOne({ '_id': new ObjectId(id)}) 
     
     return response.json(result)
   }  
