@@ -39,9 +39,6 @@ export default {
       await client.connect();
       const database = client.db("project-cars");
       const collection = database.collection("car");
-      // create a document to be inserted
-      const { name, age} = request.body
-  
       
       const result = await collection.insertOne(dataCar);
       
@@ -69,6 +66,40 @@ export default {
     const { id } = request.params
 
     const result = await collection.findOne({ "_id" : new ObjectId(id)})
+    return response.json(result)
+  },
+
+  async edit(request: Request, response: Response) {
+    await client.connect();
+    const database = client.db("project-cars");
+    const collection = database.collection("car");
+
+    const { id } = request.params
+    const {
+      marca,
+      model,
+      versao,
+      ano,
+      quilometragem,
+      tipo_cambio,
+      preco_de_venda
+    }: Car = request.body
+
+    const result = await collection.updateOne({
+      "_id" : new ObjectId(id)
+      }, {
+        $set: {
+          marca, 
+          model, 
+          versao, 
+          ano, 
+          quilometragem, 
+          tipo_cambio, 
+          preco_de_venda
+        }
+      }
+    )
+
     return response.json(result)
   }
 }
