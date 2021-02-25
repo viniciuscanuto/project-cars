@@ -23,7 +23,6 @@ interface CarFilter {
 }
 
 const uri = 'mongodb://localhost:27017/project-cars'
-const mongoRepository = new MongoRepository(uri)
 
 export default {
   async create (request: Request, response: Response){
@@ -52,6 +51,7 @@ export default {
       const isValid = await carValidator.validate(dataCar)
   
       if(isValid){
+        const mongoRepository = new MongoRepository(uri)
         const carCollection = await mongoRepository.getCollection('car')
         await carCollection.insertOne(dataCar);
         return response.status(200).json('Successfully Created')
@@ -66,6 +66,7 @@ export default {
 
   async index(request: Request, response: Response) {
     try{
+      const mongoRepository = new MongoRepository(uri)
       const carCollection = await mongoRepository.getCollection('car')
       const result = await carCollection.aggregate().toArray()
 
@@ -81,9 +82,13 @@ export default {
     try {
       const { id } = request.params
 
+      const mongoRepository = new MongoRepository(uri)
       const carCollection = await mongoRepository.getCollection('car')
       const result = await carCollection.findOne({ "_id" : new ObjectId(id)})
-      return response.json(result)
+      if(!result) {
+        return response.status(404).json('Not Found')
+      }
+      return response.status(200).json(result)
     } catch(error) {
       console.log(error)
       response.status(500).json('Internal Server Error')
@@ -103,6 +108,7 @@ export default {
         preco_de_venda
       }: Car = request.body
 
+      const mongoRepository = new MongoRepository(uri)
       const carCollection = await mongoRepository.getCollection('car')
       const result = await carCollection.updateOne({
         "_id" : new ObjectId(id)
@@ -118,7 +124,7 @@ export default {
         }
       })
 
-      return response.json(result)
+      return response.status(200).json('Car updated')
     } catch(error) {
       console.log(error)
       response.status(500).json('Internal Server Error')
@@ -129,10 +135,10 @@ export default {
     try {
       const { id } = request.params
 
+      const mongoRepository = new MongoRepository(uri)
       const carCollection = await mongoRepository.getCollection('car')
-      const result = await carCollection.deleteOne({ '_id': new ObjectId(id)}) 
-      
-      return response.json(result)
+      await carCollection.deleteOne({ '_id': new ObjectId(id)}) 
+      return response.status(200).json('Car deleted')
     } catch(error) {
       console.log(error)
       response.status(500).json('Internal Server Error')
@@ -153,6 +159,7 @@ export default {
         preco_de_vendaRange
       }:CarFilter = request.body
 
+      const mongoRepository = new MongoRepository(uri)
       const carCollection = await mongoRepository.getCollection('car')
       const result = await carCollection.aggregate([{
         $match: { 
