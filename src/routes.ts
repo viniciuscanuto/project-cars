@@ -11,4 +11,6 @@ routes.get('/cars/:id', CarController.show)
 routes.put('/cars/:id', CarController.edit)
 routes.delete('/cars/:id', CarController.destroy)
 
+routes.post('/cars/filter', CarController.showByFilter)
+
 export default routes;

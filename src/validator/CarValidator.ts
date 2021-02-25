@@ -3,7 +3,7 @@ import * as Yup from 'yup'
 
 export class CarValidator {
   
-  async validate(data: Car): Promise<boolean> {
+  async validate(data: Car) {
     try {
       
       const schema = Yup.object().shape({
@@ -15,7 +15,7 @@ export class CarValidator {
         tipo_cambio: Yup.string().required(),
         preco_de_venda: Yup.number().required()
       });
-      return await schema.isValid(data)
+      return await schema.isValid(data);
       
     } catch(error) {
       console.error
